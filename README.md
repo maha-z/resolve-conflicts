@@ -10,3 +10,4 @@ The React starter project contains
 * Wrapper components for theming and catching errors
 * Jest Setup to run unit tests
 * CI workflows - building, testing and code quality gauge
+* NEW changes
