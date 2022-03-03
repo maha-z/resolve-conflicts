@@ -1,0 +1,63 @@
+name: dev-deploy
+
+on:
+  push:
+    branches: [master]
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '10.17'
+      - name: Install dependencies
+        run: npm install     
+      - name: Build App
+        run: npm run build
+
+      
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/cache
+            !~/cache/exclude
+            **/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '10.17'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm run test:coverage
+      # uncomment when you have sonar setup
+      # - name: Run code coverage
+      #   run: npm run sonar
+  deploy-storybook: 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'  
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '10.17'
+      - run: npm install
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
+        # Options required to the GitHub chromatic action
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # 👇 Chromatic projectToken, refer to the manage page to obtain it.
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true #  Option to prevent the workflow from failing

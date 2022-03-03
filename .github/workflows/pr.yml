@@ -1,0 +1,44 @@
+name: pr
+
+on: [pull_request]
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '14.17.3'
+    - name: Install dependencies
+      run: npm install    
+    # - name: Generate types
+    #   run:  
+    - name: Build App
+      run: npm run build
+    - name: Build Storybook
+      run: npm run build-storybook
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/cache
+          !~/cache/exclude
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: '10.17'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm run test:coverage
+      # uncomment when you have sonar setup
+      # - name: Run code coverage
+      #   run: npm run sonar
+
